@@ -1,0 +1,366 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+global time125:=0
+time3:=0
+time4:=0
+isOk:=0
+winStat:=0
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;main loop;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Loop
+{
+	IfWinActive, Path of Exile
+		winStat=1
+	else
+		winStat=0
+	if(winStat)
+	{
+		;hp middle
+		CoordMode, Pixel, Screen
+		PixelSearch, FoundX, FoundY, 70, 650, 70, 650, 0x841E25, 0, Fast RGB
+		If ErrorLevel
+			m_hpFlag:=1
+		If ErrorLevel = 0
+			m_hpFlag:=0
+		;hp low
+		CoordMode, Pixel, Screen
+		PixelSearch, FoundX, FoundY, 71, 708, 71, 708, 0x6A0C14, 0, Fast RGB
+		If ErrorLevel
+			l_hpFlag:=1
+		If ErrorLevel = 0
+			l_hpFlag:=0
+		;chat
+		CoordMode, Pixel, Screen
+		PixelSearch, FoundX, FoundY, 287, 285, 287, 285, 0x4A2008, 0, Fast RGB
+		If ErrorLevel
+			chatFlag:=0
+		If ErrorLevel = 0
+			chatFlag:=1
+		;inventory
+		CoordMode, Pixel, Screen
+		PixelSearch, FoundX, FoundY, 1333, 378, 1333, 378, 0x312218, 0, Fast RGB
+		If ErrorLevel
+			inventoryFlag:=0
+		If ErrorLevel = 0
+			inventoryFlag:=1
+		;chat or inventor is open?
+		if(inventoryFlag==0 && chatFlag==0)
+			isOk=1
+		else
+			isOk=0
+		Sleep 100
+		time125+=180
+		time3+=180
+		time4+=180
+		
+		;middle life Flask
+		if(isOk && m_hpFlag && time4>=3300)
+		{
+			SendInput {4}
+			SendInput {Q}
+			time4=0
+			;defensive flask
+			if(time125>=4600)
+			{
+				SendInput {1}{2}{5}
+				time125=0
+			}
+		}
+		;low life Flask
+		if(l_hpFlag)
+		{
+			SendInput {4}
+			SendInput {Q}
+			time4=0
+			;defensive flask
+			if(time125>=4600)
+			{
+				SendInput {1}{2}{5}
+				time125=0
+			}
+		}
+		;quicksilver
+		if(isOk && time3>=3500)
+		{
+			SendInput {3}
+			time3=0	
+		}
+	}
+}
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;mouse buttons;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;hold attack
+;hold attack must be in Inster key
+*RButton::
+Click, down, right
+if(winStat && isOk)
+{
+	;defensive flask
+	while(GetKeyState("RButton"))
+	{
+		if(time125>=4600)
+		{
+			SendInput {1}{2}{5}{Q}
+			time125=0
+		}
+		time125+=111
+		if(time3>=3500)
+		{
+			SendInput {3}{Q}
+			time3=0
+		}
+		Sleep 100
+		time3+=100
+	}
+}
+return
+
+*RButton up::
+Click, up, right
+return
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+*MButton::
+Click, down, middle
+if(winStat && isOk)
+{
+	;defensive flask
+	while(GetKeyState("MButton"))
+	{
+		if(time125>=4600)
+		{
+			SendInput {1}{2}{5}{Q}
+			time125=0
+		}
+		time125+=111
+		if(time3>=3500)
+		{
+			SendInput {3}{Q}
+			time3=0
+		}
+		Sleep 100
+		time3+=100
+	}
+}
+return
+
+*MButton up::
+Click, up, middle
+return
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;F keys;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+F9::Pause
+F10::Reload
+
+;wisdom item then sell it
+~F1::
+if(winStat)
+{
+	BlockInput, MouseMove
+	MouseGetPos, mouseX, mouseY
+	SendInput, {Click, 1331, 589 Right, 1}
+	Sleep, 1
+	SendInput, {Click, %mouseX%, %mouseY% Left, 1}
+	Sleep, 222
+	
+	SendInput ^{Click, Left, 1}
+	BlockInput, MouseMoveOff
+}
+return
+;gem chance
+~F2::
+if(winStat)
+{
+	MouseGetPos, mouseX, mouseY
+	BlockInput, MouseMove
+	Send i
+	Click, 998, 139 Right, 1
+	Sleep, 100
+	Click, 1147, 180 Left, 1
+	Sleep, 100
+	Click, 998, 139 Left, 1
+	Sleep, 100
+	Send i
+	BlockInput, MouseMoveOff
+	Click, %mouseX%, %mouseY%, 0
+}
+return
+;copy selected text alt+tab then paste
+F3::
+{
+;Send, {LControl Down}{c}{LControl Up}
+;Sleep, 100
+Send, {LAlt  Down}{Tab}{LAlt Up}
+Sleep, 333
+Send, {Enter}
+Sleep, 100
+Send, {LControl Down}{v}{LControl Up}
+Sleep, 100
+Send, {Enter}
+Sleep, 100
+Send, {LAlt  Down}{Tab}{LAlt Up}
+Sleep, 100
+}
+return
+;t4t + kick yourself + hideout
+~F4::
+if(winStat)
+{
+	send {ctrl down}{Enter}{ctrl up}t4t{Enter}{Enter}/kick whatisthischaos{Enter}
+	send {enter}/hideout{enter}
+}
+return
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;additional;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;dynamite + light
+~V::
+if(winStat)
+{
+	if(isOk)
+	{
+	SendInput {F}{[}	
+	}
+}
+return
+;inventory to stash
+~B::
+if(winStat)
+{
+	if(inventoryFlag==1 && chatFlag==0)
+	{
+		;isCurrencyTab Open
+		CoordMode, Pixel, Window
+		PixelSearch, FoundX, FoundY, 233, 196, 233, 196, 0x486462, 0, Fast RGB
+		if(!ErrorLevel)
+		{
+			BlockInput, MouseMove
+			Xstart:=920 , xMovementAmount:= 38.5
+			Ystart:=440 , yMovementAmount:= 38.5
+			Click, %Xstart%, %Ystart% , 0
+			Sleep 10
+			loop 5
+			{
+				loop 3
+				{
+					SetKeyDelay -1
+					SendInput {ctrl down}
+					SetMouseDelay 5
+					Click, %Xstart%, %Ystart% Left, 1
+					SetKeyDelay -1
+					SendInput {ctrl up}
+					Xstart+=%xMovementAmount%
+				}
+				Xstart=924
+				Ystart+=%yMovementAmount%
+			}
+			BlockInput, MouseMoveOff
+		}
+	}
+}
+return
+;currency ratio
+~]::
+if(winStat)
+{
+myCurrencyAmount:=0
+ratio:=0
+;20 jeweller
+InputBox, myCurrencyAmount, My stack of curreny in C, how many currency you have
+;10:1C
+InputBox, ratio, My stack of curreny in C, 1C worth 
+ans:=myCurrencyAmount/ratio
+Gui, Font, s15, Verdana
+Gui, Add, Text,, answer is %ans%
+Gui, Show
+KeyWait, Enter
+KeyWait, Enter, D
+Gui, Destroy
+}
+return
+;jeweller
+~^\::
+if(winStat)
+{
+	;stash acik ise
+	if(!isOk)
+	{
+		BlockInput, MouseMove
+		loop
+		{
+			Click, 77, 338 Right, 1
+			Sleep, 10
+			Click, 953, 467 Left, 1
+			Sleep, 10
+			if(stopKey)
+				break
+		}
+		stopKey=0
+		BlockInput, MouseMoveOff
+	}
+}
+return
+;stop jeweller
+~^/::
+if(winStat)
+{
+	stopKey:=1
+}
+return
+;portal
+~^c::
+if(winStat)
+{
+	if(isOk)
+	{
+		send  {i}
+		Click, 1334, 437 Right, 1
+		Sleep, 10
+		send  {i}
+		Click, 684, 330 ,0
+	}
+}
+return
+
+;alteration
+~!]::
+if(winStat)
+{
+	BlockInput on
+	Click, 74, 230 Right, 1
+	Sleep, 10
+	Click, 234, 371 Left, 1
+	Sleep, 10
+	BlockInput off
+}
+return
+;augmentation
+~!\::
+if(winStat)
+{
+	BlockInput on
+	Click, 180, 290 Right, 1
+	Sleep, 10
+	Click, 234, 371 Left, 1
+	Sleep, 10
+	BlockInput off
+}
+return
+
+~^F1::
+{
+	BlockInput on
+	SetKeyDelay -1
+	SendInput, {Esc}
+	SetMouseDelay -1
+	Click, 727, 307 Left, 1
+	Sleep, 10
+	BlockInput off
+}
+return
+
+
+
+
+
